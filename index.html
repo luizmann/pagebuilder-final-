@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PageBuilder - Final</title>
+</head>
+<body>
+  <h1>PageBuilder Final App</h1>
+  <p>Status: Ready</p>
+  <form id="form">
+    <input type="text" id="productUrl" placeholder="Paste product URL" required />
+    <button type="submit">Generate</button>
+  </form>
+  <pre id="output"></pre>
+
+  <script>
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const productUrl = document.getElementById('productUrl').value;
+      document.getElementById('output').innerText = 'Generating...';
+      try {
+        const res = await fetch('/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productUrl })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('output').innerText = data.html;
+        } else {
+          document.getElementById('output').innerText = 'Error: ' + data.message;
+        }
+      } catch (err) {
+        document.getElementById('output').innerText = 'Request failed';
+      }
+    });
+  </script>
+</body>
+</html>
