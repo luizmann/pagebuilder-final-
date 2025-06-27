@@ -1,1 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Shopify Page Builder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+  <h2>Shopify Page Builder</h2>
+  <form id="pageForm">
+    <label>
+      Product Link:
+      <input type="text" id="productLink" required />
+    </label>
+    <br/><br/>
+    <button type="submit">Generate and Publish</button>
+  </form>
+  <div id="output" style="white-space: pre-wrap; margin-top: 20px;"></div>
+
+  <script>
+    document.getElementById("pageForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const productLink = document.getElementById("productLink").value;
+
+      const genRes = await fetch("/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productLink })
+      });
+      const genData = await genRes.json();
+      if (!genData.success) {
+        alert("Generation failed");
+        return;
+      }
+
+      const result = genData.result;
+      const titleMatch = result.match(/Title:(.*?)\n/);
+      const title = titleMatch ? titleMatch[1].trim() : "Generated Product";
+
+      const pubRes = await fetch("/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          bodyHtml: result
+        })
+      });
+      const pubData = await pubRes.json();
+      if (!pubData.success) {
+        alert("Publication failed");
+        return;
+      }
+
+      document.getElementById("output").innerText = 
+        "✅ Product published successfully!\n\n" + result;
+    });
+  </script>
+</body>
+</html>
 
